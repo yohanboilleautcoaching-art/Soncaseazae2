@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz SONCASE — Azaé</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EF;
+    --card: #FFFFFF;
+    --navy: #1A2E4A;
+    --blue: #1E5799;
+    --blue-light: #E8F0FA;
+    --accent: #C8A84B;
+    --accent-light: #FBF5E6;
+    --text: #1A2E4A;
+    --muted: #6B7A8D;
+    --border: #E2DDD6;
+    --success: #2D7A4F;
+    --success-bg: #EAF5EE;
+    --error: #B83232;
+    --error-bg: #FCEAEA;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(26,46,74,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--navy);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: #fff;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+  .header-left p {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.82rem;
+    font-weight: 300;
+    margin-top: 4px;
+  }
+  .badge-azae {
+    background: var(--accent);
+    color: var(--navy);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: var(--navy);
+    padding: 0 40px 20px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 400;
+  }
+  .progress-count {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.8);
+    font-weight: 500;
+  }
+  .progress-track {
+    height: 3px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* SCORE BANNER */
+  .score-banner {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .score-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .score-pill .val {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .score-pill.correct .val { color: var(--success); }
+  .score-pill.incorrect .val { color: var(--error); }
+
+  /* VERBATIM CARD */
+  .verbatim-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 24px;
+    animation: slideUp 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .verbatim-top {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .verbatim-num {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .verbatim-text {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text);
+    font-weight: 400;
+    font-style: italic;
+  }
+  .verbatim-text::before { content: '\201C'; }
+  .verbatim-text::after  { content: '\201D'; }
+
+  /* MOBILE GRID */
+  .mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+  }
+  @media (max-width: 680px) {
+    .mobile-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  @media (max-width: 400px) {
+    .mobile-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .mobile-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 6px;
+    border: none;
+    border-right: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .mobile-btn:last-child { border-right: none; }
+  .mobile-btn:hover:not(:disabled) {
+    background: var(--blue-light);
+    color: var(--blue);
+  }
+  .mobile-btn:active:not(:disabled) { transform: scale(0.95); }
+  .mobile-btn .letter {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--navy);
+    transition: color 0.15s;
+  }
+  .mobile-btn:hover:not(:disabled) .letter { color: var(--blue); }
+
+  /* Selected state */
+  .mobile-btn.selected {
+    background: var(--blue-light);
+  }
+  .mobile-btn.selected .letter { color: var(--blue); }
+  .mobile-btn.selected::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    width: 20px;
+    height: 3px;
+    background: var(--blue);
+    border-radius: 2px;
+  }
+
+  /* Correct / incorrect reveal */
+  .mobile-btn.correct {
+    background: var(--success-bg) !important;
+  }
+  .mobile-btn.correct .letter { color: var(--success) !important; }
+  .mobile-btn.correct::after {
+    content: '✓';
+    position: absolute;
+    bottom: 5px;
+    font-size: 0.75rem;
+    color: var(--success);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .mobile-btn.missed {
+    background: var(--accent-light) !important;
+  }
+  .mobile-btn.missed .letter { color: var(--accent) !important; }
+  .mobile-btn.missed::after {
+    content: '→';
+    position: absolute;
+    bottom: 5px;
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .mobile-btn.wrong {
+    background: var(--error-bg) !important;
+  }
+  .mobile-btn.wrong .letter { color: var(--error) !important; }
+  .mobile-btn.wrong::after {
+    content: '✗';
+    position: absolute;
+    bottom: 5px;
+    font-size: 0.75rem;
+    color: var(--error);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .mobile-btn:disabled { cursor: default; }
+
+  /* FEEDBACK ZONE */
+  .feedback {
+    padding: 16px 28px;
+    border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--muted);
+    min-height: 60px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  .feedback.correct-fb { background: var(--success-bg); color: #1B5436; }
+  .feedback.partial-fb { background: var(--accent-light); color: #6B4C00; }
+  .feedback.wrong-fb   { background: var(--error-bg); color: var(--error); }
+  .feedback-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* MULTI-MOBILE HINT */
+  .multi-hint {
+    padding: 8px 28px 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* VALIDATE BTN */
+  .validate-wrap {
+    padding: 14px 28px 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-validate {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+  .btn-validate:hover { background: #163f72; }
+  .btn-validate:active { transform: scale(0.97); }
+  .btn-validate:disabled { background: var(--border); color: var(--muted); cursor: default; }
+
+  /* NEXT BTN */
+  .btn-next {
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-next:hover { background: #0f1e31; }
+  .btn-next .arrow { font-size: 1rem; }
+
+  /* RESULTS SCREEN */
+  .results {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 48px 40px;
+    text-align: center;
+    animation: slideUp 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .results-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .results-subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 36px;
+    font-weight: 300;
+  }
+  .score-display {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--blue-light);
+    border-radius: 16px;
+    padding: 28px 48px;
+    margin-bottom: 36px;
+    gap: 4px;
+  }
+  .score-big {
+    font-family: 'DM Serif Display', serif;
+    font-size: 4rem;
+    color: var(--blue);
+    line-height: 1;
+  }
+  .score-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  @media (max-width: 500px) { .results-grid { grid-template-columns: 1fr 1fr; } }
+  .result-stat {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .result-stat .stat-val {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--navy);
+    font-family: 'DM Serif Display', serif;
+  }
+  .result-stat .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .btn-restart {
+    background: var(--accent);
+    color: var(--navy);
+    border: none;
+    padding: 14px 36px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+  .btn-restart:hover { background: #b8932f; }
+  .btn-restart:active { transform: scale(0.97); }
+
+  .soncase-ref {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .soncase-pill {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .pill-S { background: #E8F0FA; color: #1E5799; }
+  .pill-O { background: #FBF5E6; color: #7A5800; }
+  .pill-N { background: #EAF5EE; color: #2D7A4F; }
+  .pill-C { background: #F5EAF5; color: #6A2D7A; }
+  .pill-A { background: #FCEAEA; color: #B83232; }
+  .pill-S2 { background: #FFF0E8; color: #994400; }
+  .pill-E { background: #E8F5EA; color: #1B5E20; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Quiz SONCASE</h1>
+    <p>Identifiez le mobile d'achat dominant — formation commerciale Azaé</p>
+  </div>
+  <span class="badge-azae">Azaé</span>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-info">
+    <span class="progress-label">Progression</span>
+    <span class="progress-count" id="progress-count">0 / 19</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="main" id="main-content">
+
+  <div class="score-banner">
+    <div class="score-pill correct">
+      <span>✓ Correct</span>
+      <span class="val" id="score-ok">0</span>
+    </div>
+    <div class="score-pill incorrect">
+      <span>✗ À revoir</span>
+      <span class="val" id="score-ko">0</span>
+    </div>
+    <div class="score-pill">
+      <span>Restants</span>
+      <span class="val" id="score-left">19</span>
+    </div>
+  </div>
+
+  <div id="quiz-area"></div>
+
+</div>
+
+<script>
+const MOBILES = [
+  { key: 'S',  label: 'Sécurité',      letter: 'S' },
+  { key: 'O',  label: 'Orgueil',       letter: 'O' },
+  { key: 'N',  label: 'Nouveauté',     letter: 'N' },
+  { key: 'C',  label: 'Confort',       letter: 'C' },
+  { key: 'A',  label: 'Argent',        letter: 'A' },
+  { key: 'S2', label: 'Sympathie',     letter: 'S' },
+  { key: 'E',  label: 'Environnement', letter: 'E' },
+];
+
+const DATA = [
+  {
+    text: "Je préfère payer un peu plus cher si cela me garantit une personne fiable et bien formée.",
+    answers: ['S'],
+    feedback: "Le client accepte de payer plus pour la fiabilité et la formation : c'est un besoin de sécurité. Le prix n'est pas un frein — c'est la confiance qui prime."
+  },
+  {
+    text: "Le repassage me pèse énormément, j'aimerais vraiment m'en débarrasser.",
+    answers: ['C'],
+    feedback: "Se débarrasser d'une corvée pour se simplifier la vie : mobile Confort. Le client cherche à alléger son quotidien, pas à épater ou économiser."
+  },
+  {
+    text: "Je privilégie les entreprises qui ont une démarche respectueuse de l'environnement.",
+    answers: ['E'],
+    feedback: "La démarche éco-responsable est le critère explicite. Mobile Environnement dominant — à valoriser en parlant des produits verts utilisés par Azaé."
+  },
+  {
+    text: "Une amie m'a recommandé votre entreprise et j'ai confiance en son avis.",
+    answers: ['S', 'S2'],
+    feedback: "Double mobile : la recommandation active la Sympathie (lien affectif avec l'amie), et la confiance dans cet avis révèle aussi un besoin de Sécurité."
+  },
+  {
+    text: "Quand je reçois ma famille, j'aime que ma maison soit irréprochable.",
+    answers: ['O', 'C'],
+    feedback: "L'image donnée lors des réceptions = Orgueil. Mais la maison irréprochable sans effort = Confort. Les deux coexistent : valorisez l'un et l'autre."
+  },
+  {
+    text: "Je n'ai jamais utilisé ce type de service mais cela pourrait me faire gagner beaucoup de temps.",
+    answers: ['N', 'C'],
+    feedback: "Première expérience du service = Nouveauté. Gain de temps = Confort. Le prospect est curieux et pragmatique : rassurez sur la prise en main, insistez sur le bénéfice temps."
+  },
+  {
+    text: "Je veux être certain que la personne qui viendra chez moi est digne de confiance.",
+    answers: ['S'],
+    feedback: "Verbatim pur Sécurité : l'enjeu est l'accès au domicile. Répondez avec les éléments de réassurance : sélection, formation, badges qualité Azaé."
+  },
+  {
+    text: "Je cherche une solution écologique qui me simplifie aussi le quotidien.",
+    answers: ['E', 'C'],
+    feedback: "Éco-responsable = Environnement. Simplifier le quotidien = Confort. Argumentez sur les deux registres : produits verts ET délégation sans effort."
+  },
+  {
+    text: "Mon critère principal reste le budget mensuel.",
+    answers: ['A'],
+    feedback: "Explicite et sans ambiguïté : Argent. C'est le moment de sortir le levier crédit d'impôt (50 % de réduction effective) et le rapport qualité-prix Azaé."
+  },
+  {
+    text: "J'aimerais une maison impeccable pour recevoir mes amis mais je n'ai plus le temps de m'en occuper.",
+    answers: ['O', 'C'],
+    feedback: "Recevoir les amis dans une belle maison = Orgueil. Ne plus avoir à s'en occuper = Confort. Même logique que le verbatim famille — image + délégation."
+  },
+  {
+    text: "J'ai eu un très bon contact avec votre conseillère lors de notre premier échange.",
+    answers: ['S2'],
+    feedback: "Le lien humain avec la conseillère est au cœur : mobile Sympathie. Capital relationnel à entretenir — cette cliente achète autant la personne que le service."
+  },
+  {
+    text: "Je n'ai jamais essayé les services à domicile mais j'aimerais voir ce que cela peut m'apporter.",
+    answers: ['N'],
+    feedback: "Ouverture à une expérience nouvelle = Nouveauté. Proposez un essai, une première intervention découverte — le client est prêt à tester."
+  },
+  {
+    text: "Je cherche la formule la plus avantageuse financièrement avec le crédit d'impôt.",
+    answers: ['A'],
+    feedback: "Argent, clairement. La mention spontanée du crédit d'impôt montre que le client a déjà fait ses recherches. Confirmez le calcul et sécurisez la décision."
+  },
+  {
+    text: "J'aimerais limiter l'utilisation de produits chimiques à la maison.",
+    answers: ['E'],
+    feedback: "Mobile Environnement : réduire les produits chimiques est une conviction, pas une contrainte budget. Valorisez la gamme de produits naturels ou éco-certifiés."
+  },
+  {
+    text: "Je veux récupérer du temps pour ma famille plutôt que faire le ménage.",
+    answers: ['C'],
+    feedback: "Déléguer le ménage pour vivre mieux = Confort pur. Le bénéfice est émotionnel (temps famille) et pratique. Argument fort : combien de temps libéré par semaine ?"
+  },
+  {
+    text: "Une amie vous recommande et je souhaite être rassuré sur la qualité des intervenants.",
+    answers: ['S', 'S2'],
+    feedback: "La recommandation d'une amie = Sympathie. Mais le besoin de réassurance sur la qualité = Sécurité. Répondez sur les deux : relation de confiance ET garanties professionnelles."
+  },
+  {
+    text: "J'accorde beaucoup d'importance à l'image que renvoie mon intérieur lorsque j'ai des invités.",
+    answers: ['O'],
+    feedback: "Verbatim Orgueil par excellence : l'intérieur est une extension de l'image de soi. Jouez sur la fierté, le standing, l'effet « waouh » des invités."
+  },
+  {
+    text: "J'aime tester de nouvelles solutions pour me simplifier la vie.",
+    answers: ['N', 'C'],
+    feedback: "Profil early adopter curieux = Nouveauté. But final = simplification = Confort. Client réceptif aux innovations Azaé (app, suivi en ligne, flexibilité)."
+  },
+  {
+    text: "J'ai besoin d'une entreprise capable de gérer les absences et les remplacements sans que j'aie à m'en préoccuper.",
+    answers: ['S', 'C'],
+    feedback: "Gérer les remplacements sans implication client = Sécurité (fiabilité du service) + Confort (zéro gestion). Insistez sur la continuité garantie par Azaé."
+  },
+];
+
+let current = 0;
+let selected = [];
+let scoreOk = 0;
+let scoreKo = 0;
+let validated = false;
+
+function updateProgress() {
+  const pct = (current / DATA.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = current + ' / ' + DATA.length;
+  document.getElementById('score-ok').textContent = scoreOk;
+  document.getElementById('score-ko').textContent = scoreKo;
+  document.getElementById('score-left').textContent = DATA.length - current;
+}
+
+function renderCard(idx) {
+  const item = DATA[idx];
+  const isMulti = item.answers.length > 1;
+  selected = [];
+  validated = false;
+
+  const area = document.getElementById('quiz-area');
+  area.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'verbatim-card';
+
+  // Top: number + text
+  const top = document.createElement('div');
+  top.className = 'verbatim-top';
+  top.innerHTML = `
+    <div class="verbatim-num">${idx + 1}</div>
+    <div class="verbatim-text">${item.text}</div>
+  `;
+  card.appendChild(top);
+
+  // Multi hint
+  if (isMulti) {
+    const hint = document.createElement('div');
+    hint.className = 'multi-hint';
+    hint.textContent = '💡 Plusieurs mobiles possibles pour ce verbatim.';
+    card.appendChild(hint);
+  }
+
+  // Mobile grid
+  const grid = document.createElement('div');
+  grid.className = 'mobile-grid';
+
+  MOBILES.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'mobile-btn';
+    btn.dataset.key = m.key;
+    btn.innerHTML = `<span class="letter">${m.letter}</span><span>${m.label}</span>`;
+    btn.addEventListener('click', () => toggleMobile(m.key, btn, item));
+    grid.appendChild(btn);
+  });
+  card.appendChild(grid);
+
+  // Validate button
+  const vWrap = document.createElement('div');
+  vWrap.className = 'validate-wrap';
+  const vBtn = document.createElement('button');
+  vBtn.className = 'btn-validate';
+  vBtn.id = 'btn-validate';
+  vBtn.textContent = 'Valider';
+  vBtn.disabled = true;
+  vBtn.addEventListener('click', () => validate(item, card));
+  vWrap.appendChild(vBtn);
+  card.appendChild(vWrap);
+
+  // Feedback zone (hidden until validate)
+  const fb = document.createElement('div');
+  fb.id = 'feedback-zone';
+  fb.style.display = 'none';
+  card.appendChild(fb);
+
+  area.appendChild(card);
+}
+
+function toggleMobile(key, btn, item) {
+  if (validated) return;
+  const idx = selected.indexOf(key);
+  if (idx === -1) {
+    selected.push(key);
+    btn.classList.add('selected');
+  } else {
+    selected.splice(idx, 1);
+    btn.classList.remove('selected');
+  }
+  document.getElementById('btn-validate').disabled = selected.length === 0;
+}
+
+function validate(item, card) {
+  validated = true;
+  const answers = item.answers;
+
+  // Disable all buttons
+  card.querySelectorAll('.mobile-btn').forEach(btn => {
+    btn.disabled = true;
+    const key = btn.dataset.key;
+    btn.classList.remove('selected');
+
+    const isAnswer = answers.includes(key);
+    const isSelected = selected.includes(key);
+
+    if (isAnswer && isSelected) {
+      btn.classList.add('correct');
+    } else if (isAnswer && !isSelected) {
+      btn.classList.add('missed');
+    } else if (!isAnswer && isSelected) {
+      btn.classList.add('wrong');
+    }
+  });
+
+  // Score
+  const correctHits = selected.filter(k => answers.includes(k)).length;
+  const wrongHits = selected.filter(k => !answers.includes(k)).length;
+  const missed = answers.filter(k => !selected.includes(k)).length;
+
+  let isCorrect = correctHits === answers.length && wrongHits === 0;
+  let isPartial = correctHits > 0 && (wrongHits > 0 || missed > 0);
+
+  if (isCorrect) scoreOk++;
+  else scoreKo++;
+
+  // Feedback
+  const fb = document.getElementById('feedback-zone');
+  fb.style.display = 'flex';
+  if (isCorrect) {
+    fb.className = 'feedback correct-fb';
+    fb.innerHTML = `<span class="feedback-icon">✅</span><span><strong>Correct !</strong> ${item.feedback}</span>`;
+  } else if (isPartial) {
+    fb.className = 'feedback partial-fb';
+    fb.innerHTML = `<span class="feedback-icon">⚠️</span><span><strong>Partiel.</strong> ${item.feedback}</span>`;
+  } else {
+    fb.className = 'feedback wrong-fb';
+    fb.innerHTML = `<span class="feedback-icon">❌</span><span><strong>À revoir.</strong> ${item.feedback}</span>`;
+  }
+
+  // Replace validate with next
+  const vWrap = card.querySelector('.validate-wrap');
+  vWrap.innerHTML = '';
+  if (current < DATA.length - 1) {
+    const nBtn = document.createElement('button');
+    nBtn.className = 'btn-next';
+    nBtn.innerHTML = 'Verbatim suivant <span class="arrow">→</span>';
+    nBtn.addEventListener('click', () => {
+      current++;
+      updateProgress();
+      renderCard(current);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    vWrap.appendChild(nBtn);
+  } else {
+    const nBtn = document.createElement('button');
+    nBtn.className = 'btn-next';
+    nBtn.innerHTML = 'Voir mes résultats <span class="arrow">→</span>';
+    nBtn.addEventListener('click', () => {
+      current++;
+      updateProgress();
+      showResults();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    vWrap.appendChild(nBtn);
+  }
+}
+
+function showResults() {
+  const pct = Math.round((scoreOk / DATA.length) * 100);
+  let mention = '';
+  if (pct >= 90) mention = '🏆 Excellent — tu maîtrises le SONCASE !';
+  else if (pct >= 70) mention = '👍 Bon résultat — quelques points à consolider.';
+  else if (pct >= 50) mention = '📚 En progression — revois les mobiles ambigus.';
+  else mention = '💪 À retravailleur — reprends la méthode et recommence.';
+
+  document.getElementById('quiz-area').innerHTML = `
+    <div class="results">
+      <div class="results-title">Résultats</div>
+      <div class="results-subtitle">${mention}</div>
+      <div class="score-display">
+        <span class="score-big">${scoreOk}<span style="font-size:1.5rem;color:var(--muted)">/${DATA.length}</span></span>
+        <span class="score-label">verbatims correctement identifiés</span>
+      </div>
+      <div class="results-grid">
+        <div class="result-stat">
+          <div class="stat-val" style="color:var(--success)">${scoreOk}</div>
+          <div class="stat-label">Corrects</div>
+        </div>
+        <div class="result-stat">
+          <div class="stat-val" style="color:var(--error)">${scoreKo}</div>
+          <div class="stat-label">À revoir</div>
+        </div>
+        <div class="result-stat">
+          <div class="stat-val">${pct}%</div>
+          <div class="stat-label">Score</div>
+        </div>
+      </div>
+      <div class="soncase-ref">
+        <span class="soncase-pill pill-S">S — Sécurité</span>
+        <span class="soncase-pill pill-O">O — Orgueil</span>
+        <span class="soncase-pill pill-N">N — Nouveauté</span>
+        <span class="soncase-pill pill-C">C — Confort</span>
+        <span class="soncase-pill pill-A">A — Argent</span>
+        <span class="soncase-pill pill-S2">S — Sympathie</span>
+        <span class="soncase-pill pill-E">E — Environnement</span>
+      </div>
+      <br>
+      <button class="btn-restart" onclick="restart()">Recommencer le quiz</button>
+    </div>
+  `;
+}
+
+function restart() {
+  current = 0;
+  scoreOk = 0;
+  scoreKo = 0;
+  updateProgress();
+  renderCard(0);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Init
+updateProgress();
+renderCard(0);
+</script>
+</body>
+</html>
